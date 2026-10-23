@@ -134,6 +134,8 @@ sub MAIN(Str :$home = 'http://127.0.0.1:8083', Str :$date = ~Date.today) {
     my $raku-online = (%*ENV<RAKU_ONLINE> // $*HOME.add('raku.online')).IO;
     die "No learn/ in $raku-online: set RAKU_ONLINE to a raku.online checkout that has the learning sections"
         unless $raku-online.add('learn/tour/index.html').e;
+    # bar.js before them, as they carry its time.
+    spurt-if-changed($root.add('site/static/bar.js'), bar-js());
     assemble-learn($raku-online);
 
     # Page ids: the site's own pages first, then the articles.
@@ -194,7 +196,6 @@ sub MAIN(Str :$home = 'http://127.0.0.1:8083', Str :$date = ~Date.today) {
     $sql.spurt: %COLUMNS.keys.sort.map({ table-sql($_, %rows{$_}) }).join;
     $root.add('site/header.html').spurt: header-html(%page-id);
     $root.add('site/footer.html').spurt: footer-html();
-    spurt-if-changed($root.add('site/static/bar.js'), bar-js());
 
     # Browsers keep the site's own files for a day, so every link to one
     # carries the file's time: in site.json, and in the pages from raku.online.
@@ -675,9 +676,16 @@ sub bar-js(--> Str) {
         if (sw) bar.querySelector('.rfl-tools').appendChild(sw);
         document.body.insertBefore(bar, document.body.firstChild);
         document.documentElement.classList.add('rfl-shell');
-        function fit() \{ document.documentElement.style.setProperty('--shell-h', bar.offsetHeight + 'px'); \}
+        // Until bar.css is in, the bar is unstyled and as tall as the window;
+        // measured then, it would push the page out of sight. So fit() waits
+        // for the fixed bar, and runs again whenever the bar changes height.
+        function fit() \{
+          if (getComputedStyle(bar).position !== 'fixed') return;
+          document.documentElement.style.setProperty('--shell-h', bar.offsetHeight + 'px');
+        \}
         fit();
-        window.addEventListener('resize', fit);
+        if (window.ResizeObserver) new ResizeObserver(fit).observe(bar);
+        else \{ window.addEventListener('resize', fit); window.addEventListener('load', fit); \}
       \}
       if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build);
       else build();
