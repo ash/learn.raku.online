@@ -1,0 +1,294 @@
+/* learn.raku.online, Learn Raku — the colours and the bar at the top, shared by every page:
+   the RakuPress pages load this before site.css, and the pages built in the
+   raku.online repository (the tour, the drills, the cookbook, the examples,
+   Raku Behind the Docs) load it in place of raku.online's own bar.
+
+   Light or dark is html[data-theme-active], which /theme/boot.js sets before
+   the first paint from the reader's choice (System, Light, Dark); raku.js
+   reads the same attribute, so the editors always match the page. */
+
+:root {
+	color-scheme: light;
+
+	--rfl-paper: #fbf8f2;
+	--rfl-card: #ffffff;
+	--rfl-soft: #f3eee4;
+	--rfl-line: #e6dfd1;
+	--rfl-ink: #1e1c18;
+	--rfl-ink-2: #5b554b;
+	--rfl-ink-3: #8a8274;
+	--rfl-underline: #c9bea9;
+	--rfl-mark: #ffe08a;
+	--rfl-shadow: 0 1px 0 rgba(60, 45, 20, 0.04), 0 14px 34px -16px rgba(60, 45, 20, 0.22);
+
+	--rfl-reader: #2c6e5f;        --rfl-reader-bg: #e2efea;
+	--rfl-false-friend: #b4442e;  --rfl-false-friend-bg: #f8e5df;
+	--rfl-family: #966507;        --rfl-family-bg: #f5ead2;
+	--rfl-accent: #5a4aa0;        --rfl-accent-bg: #ebe7f7;
+	--rfl-a: #2f7a46;             --rfl-a-bg: #e2f0e6;
+	--rfl-b: #1f5f9e;             --rfl-b-bg: #e1ebf7;
+	--rfl-c: #7a3f97;             --rfl-c-bg: #f0e5f5;
+
+	/* The six parts of Learn Raku; the moved ones keep raku.online's hues. */
+	--lr-tour: #b5440f;
+	--lr-drills: #5a5fb5;
+	--lr-foreign-language: #2b5d9c;
+	--lr-examples: #2b7d3b;
+	--lr-cookbook: #8a2fa2;
+	--lr-deep: #93501f;
+
+	--rfl-display: "Fraunces", Georgia, "Times New Roman", serif;
+	--rfl-text: "Source Serif 4", Georgia, "Times New Roman", serif;
+	--rfl-ui: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+	--rfl-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+
+	--rfl-wide: 1120px;
+	--rfl-narrow: 720px;
+	--rfl-gutter: clamp(16px, 4vw, 40px);
+
+	/* The Run buttons of raku.js. */
+	--rk-embed-accent: #1e1c18;
+}
+
+:root[data-theme-active="dark"] {
+	color-scheme: dark;
+
+	--rfl-paper: #17161a;
+	--rfl-card: #1f1e23;
+	--rfl-soft: #26252b;
+	--rfl-line: #34323a;
+	--rfl-ink: #ece8e1;
+	--rfl-ink-2: #b4ada2;
+	--rfl-ink-3: #857f75;
+	--rfl-underline: #5d584f;
+	--rfl-mark: #6b5513;
+	--rfl-shadow: 0 1px 0 rgba(0, 0, 0, 0.3), 0 14px 34px -16px rgba(0, 0, 0, 0.6);
+
+	--rfl-reader: #7cc4b0;        --rfl-reader-bg: #1c3530;
+	--rfl-false-friend: #f0927c;  --rfl-false-friend-bg: #3d2420;
+	--rfl-family: #e2b552;        --rfl-family-bg: #3a2f17;
+	--rfl-accent: #b3a6f0;        --rfl-accent-bg: #2b2645;
+	--rfl-a: #86cf9a;             --rfl-a-bg: #1d3424;
+	--rfl-b: #8cbaf0;             --rfl-b-bg: #1b2c40;
+	--rfl-c: #d29be8;             --rfl-c-bg: #33213d;
+
+	--lr-tour: #e4763f;
+	--lr-drills: #9a9fe6;
+	--lr-foreign-language: #8cbaf0;
+	--lr-examples: #6fd086;
+	--lr-cookbook: #cc7ae0;
+	--lr-deep: #d99a66;
+
+	/* raku.js writes white on the accent, so it stays dark here too. */
+	--rk-embed-accent: #2f7d6c;
+}
+
+/* The strands and the levels each have a colour; components use --s and --lv. */
+.rfl-s-reader       { --s: var(--rfl-reader);       --s-bg: var(--rfl-reader-bg); }
+.rfl-s-false-friend { --s: var(--rfl-false-friend); --s-bg: var(--rfl-false-friend-bg); }
+.rfl-s-family       { --s: var(--rfl-family);       --s-bg: var(--rfl-family-bg); }
+.rfl-s-accent       { --s: var(--rfl-accent);       --s-bg: var(--rfl-accent-bg); }
+.rfl-level-a { --lv: var(--rfl-a); --lv-bg: var(--rfl-a-bg); }
+.rfl-level-b { --lv: var(--rfl-b); --lv-bg: var(--rfl-b-bg); }
+.rfl-level-c { --lv: var(--rfl-c); --lv-bg: var(--rfl-c-bg); }
+.lr-p-tour             { --p: var(--lr-tour); }
+.lr-p-drills           { --p: var(--lr-drills); }
+.lr-p-foreign-language { --p: var(--lr-foreign-language); }
+.lr-p-examples         { --p: var(--lr-examples); }
+.lr-p-cookbook         { --p: var(--lr-cookbook); }
+.lr-p-deep             { --p: var(--lr-deep); }
+
+/* ---------- the bar ---------- */
+
+/* Every property is set here, because on the pages from raku.online the
+   bar sits among stylesheets that style links, buttons and lists their own
+   way. */
+.rfl-top {
+	background: color-mix(in srgb, var(--rfl-paper) 92%, transparent);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+	border-bottom: 1px solid var(--rfl-line);
+	box-sizing: border-box;
+	color: var(--rfl-ink);
+	font-family: var(--rfl-ui);
+	line-height: 1.5;
+	position: sticky;
+	top: 0;
+	z-index: 50;
+}
+.rfl-top *, .rfl-top *::before, .rfl-top *::after { box-sizing: border-box; }
+
+.rfl-top-inner {
+	align-items: center;
+	display: flex;
+	gap: 20px;
+	margin: 0 auto;
+	max-width: var(--rfl-wide);
+	padding: 12px var(--rfl-gutter);
+}
+
+.rfl-top a, .rfl-top a:hover, .rfl-top a:focus { box-shadow: none; text-decoration: none; }
+.rfl-top .screen-reader-text {
+	clip: rect(1px, 1px, 1px, 1px);
+	height: 1px;
+	overflow: hidden;
+	position: absolute !important;
+	width: 1px;
+}
+
+.rfl-brand {
+	align-items: center;
+	color: var(--rfl-ink);
+	display: inline-flex;
+	font-family: var(--rfl-display);
+	font-size: 1.125rem;
+	font-weight: 600;
+	gap: 10px;
+	letter-spacing: -0.01em;
+	text-decoration: none;
+	white-space: nowrap;
+}
+.rfl-brand:hover, .rfl-brand:focus { color: var(--rfl-ink); }
+.rfl-brand-name i { color: var(--rfl-ink-2); font-style: italic; font-weight: 400; }
+
+/* RA over KU, as on the Learn Raku app; site/static/icon.svg is the same. */
+.rfl-mark {
+	background: var(--rfl-ink);
+	border-radius: 8px;
+	color: var(--rfl-paper);
+	display: block;
+	flex: none;
+	height: 34px;
+	width: 34px;
+}
+.rfl-mark svg { display: block; height: 100%; overflow: visible; width: 100%; }
+.rfl-mark text {
+	fill: currentColor;
+	font-family: var(--rfl-ui);
+	font-size: 42px;
+	font-weight: 800;
+	letter-spacing: -0.8px;
+	text-anchor: middle;
+}
+
+.rfl-nav {
+	display: flex;
+	font-family: var(--rfl-ui);
+	font-size: 0.9375rem;
+	gap: 2px;
+	margin-left: auto;
+}
+.rfl-top .rfl-nav a {
+	border-radius: 6px;
+	color: var(--rfl-ink-2);
+	font-weight: 400;
+	padding: 8px 10px;
+	white-space: nowrap;
+}
+.rfl-top .rfl-nav a:hover, .rfl-top .rfl-nav a:focus { background: var(--rfl-soft); color: var(--rfl-ink); }
+.rfl-top .rfl-nav a[aria-current="page"] { border-radius: 6px 6px 0 0; box-shadow: inset 0 -2px 0 var(--rfl-ink); color: var(--rfl-ink); }
+
+/* The corner: the playground and Raku++, on raku.online, and the switch. */
+.rfl-tools {
+	align-items: center;
+	border-left: 1px solid var(--rfl-line);
+	display: flex;
+	gap: 4px;
+	padding-left: 12px;
+}
+.rfl-top a.rfl-corner {
+	border-radius: 6px;
+	color: var(--rfl-ink-2);
+	font-family: var(--rfl-ui);
+	font-size: 0.875rem;
+	font-weight: 500;
+	padding: 7px 8px;
+	white-space: nowrap;
+}
+.rfl-top a.rfl-corner::after { color: var(--rfl-ink-3); content: " ↗"; }
+.rfl-top a.rfl-corner:hover, .rfl-top a.rfl-corner:focus { background: var(--rfl-soft); color: var(--rfl-ink); }
+
+/* The light and dark switch: raku.online's markup and boot.js, styled here. */
+.rfl-top .theme-switch { display: block; position: relative; right: auto; top: auto; z-index: auto; }
+.rfl-tools .theme-switch { margin-left: 4px; }
+.rfl-top .theme-btn {
+	background: var(--rfl-card);
+	border: 1px solid var(--rfl-line);
+	border-radius: 999px;
+	color: var(--rfl-ink-2);
+	cursor: pointer;
+	font-family: var(--rfl-ui);
+	font-size: 0.9375rem;
+	height: 34px;
+	line-height: 1;
+	margin: 0;
+	padding: 0;
+	width: 34px;
+}
+.rfl-top .theme-btn:hover, .rfl-top .theme-btn:focus { border-color: var(--rfl-ink-3); color: var(--rfl-ink); }
+.rfl-top .theme-menu {
+	background: var(--rfl-card);
+	border: 1px solid var(--rfl-line);
+	border-radius: 12px;
+	box-shadow: var(--rfl-shadow);
+	list-style: none;
+	margin: 0;
+	min-width: 140px;
+	padding: 6px;
+	position: absolute;
+	right: 0;
+	top: calc(100% + 8px);
+	z-index: 60;
+}
+.rfl-top .theme-menu[hidden] { display: none; }
+.rfl-top .theme-menu li { margin: 0; padding: 0; }
+.rfl-top .theme-menu button {
+	align-items: center;
+	background: none;
+	border: 0;
+	border-radius: 8px;
+	color: var(--rfl-ink);
+	cursor: pointer;
+	display: flex;
+	font-family: var(--rfl-ui);
+	font-size: 0.875rem;
+	gap: 10px;
+	margin: 0;
+	padding: 7px 10px;
+	text-align: left;
+	width: 100%;
+}
+.rfl-top .theme-menu button:hover, .rfl-top .theme-menu button:focus { background: var(--rfl-soft); }
+.rfl-top .theme-menu button[aria-checked="true"] { font-weight: 600; }
+.rfl-top .theme-menu .ti { color: var(--rfl-ink-3); display: inline-block; width: 1em; }
+
+/* On the pages from raku.online the bar is fixed, as raku.online's own is:
+   their layout keeps --shell-h free at the top, and bar.js sets it to the
+   bar's height. */
+html.rfl-shell { --shell-h: 59px; }
+html.rfl-shell .rfl-top { left: 0; position: fixed; right: 0; top: 0; }
+
+@media (max-width: 1060px) {
+	html.rfl-shell { --shell-h: 97px; }
+	.rfl-top-inner { flex-wrap: wrap; gap: 6px 16px; padding-bottom: 6px; }
+	.rfl-nav {
+		margin: 0 calc(-1 * var(--rfl-gutter));
+		order: 3;
+		overflow-x: auto;
+		padding: 0 calc(var(--rfl-gutter) - 10px);
+		scrollbar-width: none;
+		width: calc(100% + 2 * var(--rfl-gutter));
+	}
+	.rfl-nav::-webkit-scrollbar { display: none; }
+	.rfl-tools { margin-left: auto; }
+}
+
+/* On a phone the corner keeps to the first row: Playground is Play there. */
+@media (max-width: 480px) {
+	.rfl-top-inner { column-gap: 10px; }
+	.rfl-brand-name { font-size: 1rem; }
+	.rfl-tools { border-left: 0; gap: 0; padding-left: 0; }
+	.rfl-top a.rfl-corner { font-size: 0.8125rem; padding: 7px 5px; }
+	.rfl-top a.rfl-corner::after { content: none; }
+	.rfl-corner-long { display: none; }
+}

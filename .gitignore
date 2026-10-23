@@ -1,0 +1,10 @@
+site/site.sql
+site/content.db
+site/content.db-*
+site/uploads/
+site/header.html
+site/footer.html
+site/static/bar.js
+site/learn/
+site/publish.db
+.DS_Store
