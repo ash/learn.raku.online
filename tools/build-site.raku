@@ -77,6 +77,56 @@ my constant @PARTS =
       blurb => 'What Raku actually does, corner by corner: precedence, containers, Nil and Any, sink context. Each corner is one behaviour, shown by the smallest program that proves it.' };
 my constant @MOVED = @PARTS.grep(*<moved>).map(*<slug>);
 
+#| The flashcards on the front page of Raku as a Foreign Language. The page
+#| shows one, and each reload the next: false friends, word families and
+#| accents, taken turn about. A card is a few rows, each a label, a line of
+#| code and, if it prints something, what it prints; `setup` is a line the
+#| rows share. In a false friend the label names the language of the code;
+#| in the others every row is Raku. The build stops if a row's code, with its
+#| setup, is not in a block of its article, or prints something the article's
+#| output for that block does not.
+my constant @FLASHCARDS =
+    { article => 'point-one-plus-point-two', more => 'Why the answers differ',
+      rows => (('Python', '0.1 + 0.2 == 0.3', 'False'), ('Raku', '0.1 + 0.2 == 0.3', 'True')) },
+    { article => 'x-xx-cross', more => 'Meet x, xx and X',
+      rows => (('', q{'ha' x 3}, 'hahaha'), ('', q{'ha' xx 3}, '(ha ha ha)')) },
+    { article => 'double-slash', more => 'What // means in Raku',
+      rows => (('Python', '7 // 2', '3'), ('Raku', '7 // 2', '7')) },
+    { article => 'fibonacci', more => 'The Fibonacci numbers in four accents',
+      rows => (('Python', '($a, $b) = ($b, $a + $b)'), ('Perl', 'push @fib, $next'),
+               ('Native', '1, 1, * + * ...^ * >= 1000')) },
+    { article => 'plus-on-strings', more => 'Why + always adds',
+      rows => (('JavaScript', '"10" + 5', '105'), ('Raku', '"10" + 5', '15')) },
+    { article => 'map-grep-first-classify', more => 'Meet map, grep, first and classify',
+      setup => 'my @prices = 3.50, 12, 0.99, 7.25, 20;',
+      rows => (('', '@prices.grep(* > 5)', '(12 7.25 20)'), ('', '@prices.first(* > 5)', '12')) },
+    { article => 'string-equality', more => 'How Raku compares strings',
+      rows => (('Python', '"10" == "10.0"', 'False'), ('Raku', '"10" == "10.0"', 'True')) },
+    { article => 'word-count', more => 'Counting words in four accents',
+      rows => (('Python', q{$text.split(' ')}), ('Native', '$text.words')) },
+    { article => 'say-put-print-note', more => 'Meet say, put, print and note',
+      setup => q{my @birds = 'robin', 'wren', 'owl';},
+      rows => (('', 'say @birds', '[robin wren owl]'), ('', 'put @birds', 'robin wren owl')) };
+
+#| Shows the next flashcard: the first on a first visit, and the first again
+#| after the last. Without the script, or without storage, the first stays.
+my constant $FLASH-JS = q:to/JS/.trim;
+    <script>
+    (function () {
+      var cards = document.querySelectorAll('.rfl-hero .rfl-flash');
+      var n;
+      try {
+        var last = localStorage.getItem('rfl-flash');
+        n = last === null ? 0 : (parseInt(last, 10) + 1) % cards.length;
+        if (isNaN(n)) n = 0;
+        localStorage.setItem('rfl-flash', n);
+      } catch (e) { return; }
+      cards[0].hidden = true;
+      cards[n].hidden = false;
+    })();
+    </script>
+    JS
+
 #| Raku as a Foreign Language's own sections, in the second bar on its pages.
 my constant @RFL-NAV = 'start-here' => 'Start here', |@STRANDS.map({ .<slug> => .<name> }), 'levels' => 'Levels';
 
@@ -442,15 +492,8 @@ sub thousands(Int $n --> Str) { $n.flip.comb(3).join(',').flip }
 
 #| Its own front page.
 sub rfl-html(@articles --> Str) {
-    my %ff = @articles.first(*<slug> eq 'point-one-plus-point-two') // {};
-    my $flash = %ff ?? qq:to/HTML/ !! '';
-        <figure class="rfl-flash">
-        <figcaption><span class="rfl-flash-kind">False friend</span>{level-badge(%ff<fm><level>)}</figcaption>
-        <div class="rfl-flash-row"><span class="rfl-flash-lang">Python</span><code>0.1 + 0.2 == 0.3</code><span class="rfl-flash-out rfl-no">False</span></div>
-        <div class="rfl-flash-row"><span class="rfl-flash-lang">Raku</span><code>0.1 + 0.2 == 0.3</code><span class="rfl-flash-out rfl-yes">True</span></div>
-        <a class="rfl-flash-more" href="{%ff<url>}">Why the answers differ</a>
-        </figure>
-        HTML
+    my $flash = @FLASHCARDS.kv.map(-> $n, %card { flashcard(%card, @articles, hidden => $n > 0) }).join("\n")
+              ~ "\n" ~ $FLASH-JS;
 
     my $strands = @STRANDS.map(-> %s {
         my @mine = @articles.grep(*<strand><key> eq %s<key>);
@@ -506,6 +549,44 @@ sub rfl-html(@articles --> Str) {
         }.</p>
         </section>
         HTML
+}
+
+#| One flashcard: its article's kind and level, the setup line, the rows and
+#| a link to the article. What Raku prints is marked apart from what the
+#| other language prints.
+sub flashcard(%card, @articles, Bool :$hidden --> Str) {
+    my %a = @articles.first(*<slug> eq %card<article>) // die "No article %card<article> for a flashcard";
+    check-flashcard(%card, %a);
+    qq[<figure class="rfl-flash rfl-s-{%a<strand><key>}"{$hidden ?? ' hidden' !! ''}>]
+    ~ qq[<figcaption><span class="rfl-flash-kind">{%a<strand><one>.tc}</span>{level-badge(%a<fm><level>)}</figcaption>]
+    ~ (%card<setup> ?? qq[<code class="rfl-flash-setup">{esc(%card<setup>)}</code>] !! '')
+    ~ %card<rows>.map(-> ($label, $code, $out?) {
+        '<div class="rfl-flash-row">'
+        ~ ($label ?? qq[<span class="rfl-flash-lang">$label\</span>] !! '')
+        ~ qq[<code>{esc($code)}</code>]
+        ~ ($out.defined ?? qq[<span class="rfl-flash-out{$label eq 'Raku' ?? ' rfl-yes' !! ''}">{esc($out)}</span>] !! '')
+        ~ '</div>'
+    }).join
+    ~ qq[<a class="rfl-flash-more" href="{%a<url>}">{%card<more>}</a>]
+    ~ '</figure>'
+}
+
+#| Dies unless every row of a flashcard is in its article: the code, and the
+#| setup, in one block of the row's language, and the output a line of the
+#| output that follows that block.
+sub check-flashcard(%card, %a) {
+    my @blocks = code-blocks(%a<body>);
+    my %lang = %LANG.antipairs;
+    for %card<rows>.list -> ($label, $code, $out?) {
+        my $lang = %a<strand><key> eq 'false-friend' ?? %lang{$label} // 'raku' !! 'raku';
+        next if so (^@blocks).grep(-> $i {
+            my %b = @blocks[$i];
+            my $next = @blocks[$i + 1];
+            %b<lang> eq $lang && %b<code>.contains($code) && %b<code>.contains(%card<setup> // '')
+                && (!$out.defined || $next && $next<lang> eq 'output' && $next<adjacent> && $out (elem) $next<code>.lines)
+        });
+        die "The flashcard for %card<article> shows `$code`{$out.defined ?? " printing $out" !! ''}, and its article does not";
+    }
 }
 
 sub articles-html(@articles --> Str) {

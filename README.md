@@ -66,6 +66,12 @@ list is fixed, since no new article ever had an old address.
   `@PARTS` in `tools/build-site.raku`. The numbers on the cards are counted
   at build time from the pages themselves, and the build stops if a page a
   card starts with has gone.
+- The flashcard at the top of Raku as a Foreign Language's front page is
+  one of `@FLASHCARDS` in `tools/build-site.raku`: false friends, word
+  families and accents, a line or two of code from each. The first visit
+  shows the first card, and every reload the next (the browser remembers
+  which in `localStorage`). The build stops if a card's code is not in its
+  article, or prints something the article's output does not show.
 - Within a kind, articles are ordered by level, then by `posts/ORDER.md`.
 - The summary in the front matter is shown under the title and in every
   list. Code in it goes in backticks.

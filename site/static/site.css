@@ -468,19 +468,27 @@ a:hover, a:focus { color: var(--rfl-ink); }
 .entry-content a.rfl-button-quiet { background: transparent; box-shadow: inset 0 0 0 1.5px var(--rfl-ink); color: var(--rfl-ink); }
 .entry-content a.rfl-button-quiet:hover { background: var(--rfl-soft); color: var(--rfl-ink); opacity: 1; }
 
-/* A flashcard with one false friend on it. */
+/* A flashcard: a false friend, a word family or an accent, in the colour of
+   its kind. The page has several, and shows one at a time. Its rows share
+   its columns, so the labels' column is as wide as its longest label. */
 .rfl-flash {
 	background: var(--rfl-card);
 	border: 1px solid var(--rfl-line);
 	border-radius: 20px;
 	box-shadow: var(--rfl-shadow);
+	column-gap: 14px;
+	container-type: inline-size;
+	display: grid;
+	grid-template-columns: minmax(52px, auto) minmax(0, 1fr) auto;
 	margin: 0;
 	padding: 22px 26px 20px;
 	transform: rotate(-1.5deg);
 }
+.rfl-flash[hidden] { display: none; }
+.rfl-flash > * { grid-column: 1 / -1; }
 .rfl-flash figcaption { align-items: center; display: flex; justify-content: space-between; margin-bottom: 10px; }
 .rfl-flash-kind {
-	color: var(--rfl-false-friend);
+	color: var(--s);
 	font-family: var(--rfl-ui);
 	font-size: 0.8125rem;
 	font-weight: 700;
@@ -493,12 +501,28 @@ a:hover, a:focus { color: var(--rfl-ink); }
 	display: grid;
 	gap: 14px;
 	grid-template-columns: 64px minmax(0, 1fr) auto;
+	grid-template-columns: subgrid;
 	padding: 16px 0;
 }
 .rfl-flash-lang { color: var(--rfl-ink-3); font-family: var(--rfl-ui); font-size: 0.8125rem; font-weight: 600; }
-.entry-content .rfl-flash-row code { background: none; border: 0; font-size: 1.0625rem; padding: 0; white-space: nowrap; }
-.rfl-flash-out { border-radius: 6px; font-family: var(--rfl-mono); font-size: 0.9375rem; font-weight: 600; padding: 2px 10px; }
-.rfl-no  { background: var(--rfl-false-friend-bg); color: var(--rfl-false-friend); }
+/* Code wraps at its spaces only when the card is too narrow for it. A row
+   with nothing printed gives its code the room, and a row with no label has
+   no labels to line up with, so it is a grid of its own. */
+.entry-content .rfl-flash-row code { background: none; border: 0; font-size: 1.0625rem; padding: 0; white-space: pre-wrap; }
+.rfl-flash-row > code:first-child { grid-column: 1 / 3; }
+.rfl-flash-row > code:last-child { grid-column: 2 / 4; }
+.rfl-flash-row:has(> code:first-child) { grid-template-columns: minmax(0, 1fr) auto; }
+.rfl-flash-row:has(> code:first-child) > code { grid-column: auto; }
+.entry-content code.rfl-flash-setup {
+	background: none;
+	border: 0;
+	color: var(--rfl-ink-2);
+	display: block;
+	font-size: 0.875rem;
+	padding: 0 0 12px;
+	white-space: pre-wrap;
+}
+.rfl-flash-out { background: var(--s-bg); border-radius: 6px; color: var(--s); font-family: var(--rfl-mono); font-size: 0.9375rem; font-weight: 600; justify-self: end; padding: 2px 10px; white-space: nowrap; }
 .rfl-yes { background: var(--rfl-reader-bg); color: var(--rfl-reader); }
 .entry-content a.rfl-flash-more { font-family: var(--rfl-ui); font-size: 0.9375rem; font-weight: 600; text-decoration: none; }
 .entry-content a.rfl-flash-more::after { content: " →"; }
@@ -806,5 +830,13 @@ a:hover, a:focus { color: var(--rfl-ink); }
 
 @media (max-width: 420px) {
 	.rfl-langs { grid-template-columns: minmax(0, 1fr); }
-	.rfl-flash-row { grid-template-columns: 52px minmax(0, 1fr) auto; }
+	.rfl-flash { padding: 18px 18px 16px; }
+}
+
+/* A narrow flashcard, on a phone or beside the hero's text on a small
+   screen, has smaller code, so that a line of it stays one line. */
+@container (max-width: 380px) {
+	.entry-content .rfl-flash-row code { font-size: 0.9375rem; }
+	.entry-content code.rfl-flash-setup { font-size: 0.8125rem; }
+	.rfl-flash-out { font-size: 0.875rem; padding: 2px 8px; }
 }
